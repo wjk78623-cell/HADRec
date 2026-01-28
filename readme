@@ -1,0 +1,2 @@
+The task aims to perform hierarchy-aware medication recommendation by integrating patient EHR data with drug molecular structure information, while strictly adhering to the ATC classification hierarchy.
+Its goal is to improve the accuracy, interpretability, and clinical consistency of multi-label drug recommendations through multimodal fusion and hierarchical modeling.
