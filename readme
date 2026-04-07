@@ -1,377 +1,66 @@
-# LEADER: Large Language Model Enhanced Medication Recommendation
+# 🧠 LEADER: Large Language Model Enhanced Medication Recommendation
 
-Electronic Health Records (EHR)-based medication recommendation models have demonstrated significant clinical value in promoting precision medicine and enabling personalized treatment. However, existing approaches face two major challenges: **insufficient integration of drug molecular knowledge** and **inadequate handling of hierarchical medication taxonomies**. 
+---
 
-To address these challenges, this study proposes the **LEADER (Large Language Model Enhanced Medication Recommendation)** framework, which achieves accurate and interpretable medication prediction through hierarchical prediction and cross-attention drug knowledge fusion. Specifically, this method first performs LoRA fine-tuning of LLaMA-7B on clinical narratives with hierarchical ATC labels. Subsequently, a cross-attention mechanism integrates molecular drug embeddings to enhance drug-specific representations. Finally, a 4-layer defense strategy addresses severe class imbalance in medication data.
+## 📌 Overview
 
-This innovative solution not only greatly improves prediction accuracy but also provides interpretable hierarchical predictions and validated causal reasoning capability, offering a practical technical approach for clinical decision support systems.
+> **LEADER** is a novel framework for EHR-based medication recommendation that improves both **accuracy** and **interpretability**.
+>
+> It addresses two critical challenges:
+> - ❌ Lack of **molecular drug knowledge integration**
+> - ❌ Poor modeling of **hierarchical medication taxonomy**
+>
+> ✅ Our solution:
+> - Hierarchical ATC prediction (L1 → L4)
+> - Cross-attention drug knowledge fusion
+> - Robust imbalance handling strategy
 
-## Framework
+---
 
-<img width="1200" alt="framework" src="https://github.com/user-attachments/assets/framework-placeholder.png" />
+## 🏗️ Framework
 
-### Key Components
+> ![Framework](https://github.com/user-attachments/assets/framework-placeholder.png)
 
-1. **Hierarchical Prediction Head**: Multi-level ATC code prediction (L1→L2→L3→L4) with consistency constraints
-2. **Cross-Attention Drug Knowledge Module**: Fuses molecular drug embeddings with clinical representations
-3. **4-Layer Defense Strategy**: Handles severe class imbalance through Focal Loss, Class Weights, Threshold Optimization, and Hierarchical Consistency Loss
+---
 
-## Data Format
+## 🧩 Key Components
 
-All data files are in **JSONL** format (one JSON object per line). All datasets used in this project are derived from the **MIMIC-III** clinical database.
+> ### 1️⃣ Hierarchical Prediction Head
+> - Multi-level ATC prediction: **L1 → L2 → L3 → L4**
+> - Enforces **hierarchical consistency**
 
-We provide the complete data preprocessing pipeline. The processed datasets follow a hierarchical structure aligned with the ATC classification system.
+---
 
-### `train_atc_hierarchy2.json` / `val_atc_hierarchy2.json` / `test_atc_hierarchy2.json`
+> ### 2️⃣ Cross-Attention Drug Knowledge Module
+> - Integrates **molecular drug embeddings**
+> - Enhances **drug-specific representation**
 
-Each line is a training sample:
+---
 
+> ### 3️⃣ 4-Layer Defense Strategy
+> Handles severe class imbalance:
+> - Focal Loss  
+> - Class Weights  
+> - Threshold Optimization  
+> - Hierarchical Consistency Loss  
+
+---
+
+## 📂 Data Format
+
+> All datasets are in **JSONL format** (one sample per line)  
+> Source: **MIMIC-III**
+
+---
+
+> ### 📄 Sample
 ```json
 {
-  "input": "Currently, in the most recent visit, the patient presents with Diabetes mellitus type II, Hypertension, Hyperlipidemia and receives the following procedures: None. Based on these findings, the recommended medications are: ",
-  "target": "insulins and analogues, beta blocking agents, ace inhibitors, plain, lipid modifying agents, plain",
+  "input": "Clinical narrative...",
+  "target": "medications...",
   "subject_id": 12345,
   "atc_level_1": ["A", "C"],
-  "atc_level_2": ["A1", "C0", "C1"],
-  "atc_level_3": ["A10", "C07", "C09", "C10"],
-  "atc_level_4": ["A10A", "C07A", "C09A", "C10A"]
+  "atc_level_2": ["A1", "C0"],
+  "atc_level_3": ["A10", "C07"],
+  "atc_level_4": ["A10A", "C07A"]
 }
-```
-
-- **`input`**: Clinical narrative (diagnoses + procedures)
-- **`target`**: Medication names (for reference)
-- **`subject_id`**: Patient identifier
-- **`atc_level_1/2/3/4`**: Hierarchical ATC codes at each level
-
----
-
-### `drug_embeddings.pt`
-
-PyTorch tensor file storing molecular drug embeddings:
-
-```python
-# Shape: (num_drugs, embedding_dim)
-# Generated from drug SMILES strings using molecular fingerprints
-drug_embeddings = torch.load('data/mimic3/l_data/drug_embeddings.pt')
-```
-
----
-
-## LoRA Fine-tuning
-
-Teacher model (LLaMA-7B) LoRA fine-tuning is performed using this repository.
-
-### Prerequisites
-
-1. **Download LLaMA-7B**
-   - Obtain LLaMA-7B weights from [Meta AI](https://github.com/facebookresearch/llama)
-   - Place in `/path/to/llama-7b/`
-
-2. **Prepare Data**
-   - Follow [Data Preparation](#data-preparation) section
-   - Ensure `train_atc_hierarchy2.json` and `val_atc_hierarchy2.json` are ready
-
-### Configuration
-
-Edit `experiment/llm_cls.bash`:
-
-```bash
-# Model paths
-MODEL_PATH="/path/to/llama-7b"
-OUTPUT_DIR="saved/lora-atc_hierarchy2"
-
-# Training hyperparameters
-MAX_SOURCE_LENGTH=2048
-MAX_TARGET_LENGTH=196
-BATCH_SIZE=4
-LEARNING_RATE=3e-4
-NUM_EPOCHS=10
-
-# LoRA configuration
-LORA_RANK=8
-LORA_ALPHA=16
-LORA_DROPOUT=0.05
-
-# Hierarchical prediction
-HIERARCHICAL_PREDICTION=true
-USE_CROSS_ATTENTION=true
-CROSS_THRESHOLD=0.1
-```
-
-### Run Training
-
-```bash
-bash experiment/llm_cls.bash
-```
-
-This will:
-- Load LLaMA-7B base model
-- Apply LoRA adapters (rank=8)
-- Train with hierarchical prediction heads
-- Integrate drug knowledge via cross-attention
-- Save checkpoints to `saved/lora-atc_hierarchy2/`
-
-Training logs and checkpoints:
-```text
-saved/lora-atc_hierarchy2/
-├── checkpoint-500/
-├── checkpoint-1000/
-├── checkpoint-5000/  # Best checkpoint
-└── training.log
-```
-
----
-
-## Data Preparation
-
-### File Structure
-
-```text
-data/
-└── mimic3/
-    ├── raw/                           # Raw MIMIC-III data
-    │   ├── PRESCRIPTIONS.csv          # Medication prescriptions
-    │   ├── DIAGNOSES_ICD.csv          # ICD-9 diagnoses
-    │   └── PROCEDURES_ICD.csv         # ICD-9 procedures
-    ├── auxiliary/                     # Auxiliary files
-    │   ├── drug-DDI.csv               # Drug-drug interactions (from GAMENet)
-    │   ├── drug-atc.csv               # CID to ATC mapping (from GAMENet)
-    │   ├── ndc2rxcui.txt              # NDC to RXCUI mapping
-    │   └── idx2SMILES.pkl             # Drug index to SMILES strings
-    └── l_data/                        # Preprocessed data (generated)
-        ├── train_atc_hierarchy2.json  # Training set
-        ├── val_atc_hierarchy2.json    # Validation set
-        ├── test_atc_hierarchy2.json   # Test set
-        └── drug_embeddings.pt         # Molecular drug embeddings
-```
-
-### Step 1: Download MIMIC-III
-
-Apply for access at [MIMIC-III Clinical Database](https://mimic.mit.edu/).
-
-Download and place the following files in `data/mimic3/raw/`:
-- `PRESCRIPTIONS.csv`
-- `DIAGNOSES_ICD.csv`
-- `PROCEDURES_ICD.csv`
-
-### Step 2: Download Auxiliary Files
-
-- **`drug-DDI.csv`**: Download from [GAMENet](https://github.com/sjy1203/GAMENet)
-  - Contains drug-drug interaction pairs and side effects
-  
-- **`drug-atc.csv`**: Download from [GAMENet](https://github.com/sjy1203/GAMENet)
-  - Maps CID (PubChem Compound ID) to ATC codes
-  
-- **`ndc2rxcui.txt`**: Download from [GAMENet](https://github.com/sjy1203/GAMENet)
-  - Maps NDC (National Drug Code) to RXCUI
-  - Named as `ndc2rxnorm_mapping.csv` in the repository
-
-Place all files in `data/mimic3/auxiliary/`.
-
-### Step 3: Preprocess Data
-
-```bash
-cd data/mimic3
-python construction.py
-```
-
-This script will:
-1. Extract patient visits with diagnoses and procedures
-2. Map NDC codes to ATC codes via RXCUI
-3. Build hierarchical ATC labels (L1→L2→L3→L4)
-4. Generate molecular drug embeddings from SMILES
-5. Split data into train/val/test sets
-6. Save processed files to `l_data/`
-
-**Expected output:**
-```text
-Processing MIMIC-III data...
-  Loaded 4,156,450 prescriptions
-  Loaded 651,047 diagnoses
-  Loaded 240,095 procedures
-  
-Building patient visits...
-  Found 58,976 unique patients
-  Created 15,032 valid visits
-  
-Mapping NDC to ATC codes...
-  Mapped 110 unique ATC4 codes
-  
-Generating drug embeddings...
-  Created embeddings for 110 drugs
-  
-Splitting data...
-  Train: 10,523 samples
-  Val: 2,256 samples
-  Test: 2,253 samples
-  
-✓ Data preprocessing complete!
-```
-
----
-
-## Running Pipeline
-
-### Project Structure
-
-```text
-LEADER-pytorch/
-├── data/
-│   └── mimic3/
-│       ├── raw/
-│       ├── auxiliary/
-│       └── l_data/
-├── llm/
-│   ├── llama.py                       # LLaMA with hierarchical head
-│   ├── drug_knowledge_module.py       # Cross-attention module
-│   ├── peft/                          # LoRA implementation
-│   └── data_processor/
-├── generators/
-│   └── data.py                        # EHRTokenizer, vocabulary
-├── experiment/
-│   └── llm_cls.bash                   # Training script
-├── saved/
-│   └── lora-atc_hierarchy2/
-│       └── checkpoint-5000/           # Best checkpoint
-├── results/
-├── main_llm_cls.py                    # Main training/inference
-├── final_evaluation_with_bootstrap.py # Evaluation
-└── README.md
-```
-
-### Step 1: Train Model with LoRA
-
-```bash
-bash experiment/llm_cls.bash
-```
-
-- Reads `./data/mimic3/l_data/train_atc_hierarchy2.json` and `val_atc_hierarchy2.json`
-- Uses LLaMA-7B as base model with LoRA adapters
-- Trains hierarchical prediction heads (L1→L2→L3→L4)
-- Integrates drug knowledge via cross-attention
-- Saves checkpoints to:
-  ```text
-  ./saved/lora-atc_hierarchy2/checkpoint-5000/
-  ```
-
-**Training time:** ~8 hours on 1x A100 GPU
-
----
-
-### Step 2: Evaluate on Test Set
-
-```bash
-python final_evaluation_with_bootstrap.py
-```
-
-- Loads:
-  - Base LLaMA-7B + LoRA weights
-  - Best checkpoint: `saved/lora-atc_hierarchy2/checkpoint-5000/`
-- For each sample in `test_atc_hierarchy2.json`:
-  - Encodes clinical narrative
-  - Predicts hierarchical ATC codes
-  - Applies threshold (0.35) for final predictions
-- Computes metrics with bootstrap sampling (10 rounds, 30% sample ratio)
-- Writes results to:
-  ```text
-  ./final_evaluation_results/bootstrap_results.json
-  ./final_evaluation_results/bootstrap_results.csv
-  ./final_evaluation_results/bootstrap_results.md
-  ```
-
-**Output metrics:**
-- Jaccard Index
-- F1 Score
-- Precision
-- Recall
-- PR-AUC
-- Average Medications
-- DDI Rate
-
----
-
-### Step 3: Counterfactual Analysis (Optional)
-
-```bash
-# Create test cases
-python create_final_counterfactual_cases.py
-
-# Run analysis
-python run_final_counterfactual_analysis.py
-```
-
-- Creates 3 synthetic test cases:
-  - Case 1: Without diabetes
-  - Case 2: Without hypertension
-  - Case 3: With both diseases
-- Validates causal reasoning capability
-- Saves results to:
-  ```text
-  ./final_counterfactual_results/test_predictions.json
-  ./final_counterfactual_report.json
-  ```
-
----
-
-## Results
-
-### MIMIC-III Test Set Performance
-
-| Metric | Value | Description |
-|--------|-------|-------------|
-| **Jaccard** | 0.5522 ± 0.0089 | Set similarity |
-| **F1** | 0.7019 ± 0.0067 | Harmonic mean of precision and recall |
-| **Precision** | 0.7845 ± 0.0082 | Positive predictive value |
-| **Recall** | 0.6345 ± 0.0098 | Sensitivity |
-| **PR-AUC** | 0.7234 ± 0.0045 | Area under precision-recall curve |
-| **Avg.Med** | 19.28 ± 0.52 | Average number of medications |
-| **DDI** | 0.0861 ± 0.0034 | Drug-drug interaction rate |
-
-*Results obtained with bootstrap sampling (10 rounds, 30% sample ratio, threshold=0.35)*
-
-### Hierarchical Performance
-
-| Level | Classes | Jaccard | F1 | PR-AUC |
-|-------|---------|---------|----|----|
-| **L1** | 14 | 0.7234 ± 0.0112 | 0.8123 ± 0.0089 | 0.8456 ± 0.0067 |
-| **L2** | 94 | 0.6789 ± 0.0098 | 0.7845 ± 0.0076 | 0.8012 ± 0.0054 |
-| **L3** | 267 | 0.6123 ± 0.0087 | 0.7456 ± 0.0071 | 0.7678 ± 0.0049 |
-| **L4** | 110 | 0.5522 ± 0.0089 | 0.7019 ± 0.0067 | 0.7234 ± 0.0045 |
-
-### Counterfactual Analysis Results
-
-| Case | Target Disease | Target Drug | Score | Interpretation |
-|------|---------------|-------------|-------|----------------|
-| 1 | Diabetes | A10 (Antidiabetics) | 100/100 ✅ | Perfect causal reasoning |
-| 2 | Hypertension | C09 (Antihypertensives) | 83/100 ⚠️ | Good but C07A also for coronary disease |
-| 3 | Both | A10 + C09 | 83/100 ✅ | Correctly recommends both |
-
-**Average Score: 88.9/100**
-
-The model demonstrates strong causal reasoning capability, correctly identifying disease-drug relationships and adjusting recommendations based on disease presence.
-
----
-
-## Citation
-
-If you find this work useful, please cite:
-
-```bibtex
-@article{leader2024,
-  title={LEADER: Large Language Model Enhanced Medication Recommendation with Hierarchical Prediction and Drug Knowledge Fusion},
-  author={Your Name and Collaborators},
-  journal={arXiv preprint arXiv:XXXX.XXXXX},
-  year={2024}
-}
-```
-
-## Acknowledgments
-
-- [MIMIC-III](https://mimic.mit.edu/) for the clinical database
-- [LLaMA](https://github.com/facebookresearch/llama) for the base model
-- [GAMENet](https://github.com/sjy1203/GAMENet) and [SafeDrug](https://github.com/ycq091044/SafeDrug) for baseline implementations and auxiliary data
-- [MOELoRA-peft](https://github.com/liuqidong07/MOELoRA-peft) for LoRA implementation
-
-## License
-
-This project is licensed under the MIT License.
