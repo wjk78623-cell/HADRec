@@ -1,100 +1,43 @@
-The task aims to perform hierarchy-aware medication recommendation by integrating patient EHR data with drug molecular structure information, while strictly adhering to the ATC classification hierarchy.
-Its goal is to improve the accuracy, interpretability, and clinical consistency of multi-label drug recommendations through multimodal fusion and hierarchical modeling.
+# 🧬 Hierarchy-aware Medication Recommendation
 
-## Highlights
+> **Integrating patient EHR data with drug molecular structure for ATC hierarchy-aware multi-label drug recommendation.**  
+> *Improves accuracy, interpretability, and clinical consistency through multimodal fusion and hierarchical modeling.*
 
-- 🏥 Hierarchical ATC prediction (L1→L2→L3→L4)
-- 💊 Cross-attention drug knowledge fusion
-- ⚖️ 4-layer defense for class imbalance
-- 🎯 F1=0.70, Jaccard=0.55 on MIMIC-III
+---
 
+## 📌 **You need to know first!**
 
-## Requirements
+| Branch | Purpose |
+|:-------|:--------|
+| `main` | Full implementation with hierarchical ATC prediction + drug molecular fusion |
+| `archived` | Legacy version for reproducing paper results |
 
-- Python 3.10+
-- PyTorch 2.0+
-- CUDA 11.8+ (for GPU training)
+> [!IMPORTANT]
+> **Which branch to use?**
+> - Use this branch (`main`) for learning and using the code
+> - Use the [archived branch](https://github.com/ycq091044/SafeDrug/tree/archived) to reproduce paper results
 
+> [!NOTE]
+> **Implementation differences from paper:**
+> 1. Drug SMILES strings: paper's crawling method missed many molecules; current branch uses **DrugBank method** for more comprehensive coverage
+> 2. Data preprocessing script differs → output statistics may vary from paper
 
-## Data Preparation
+---
 
-### File Structure
+## ✨ **Highlights**
 
-```
-data/
-└── mimic3/
-    ├── raw/                    # Raw MIMIC-III data
-    │   ├── PRESCRIPTIONS.csv
-    │   ├── DIAGNOSES_ICD.csv
-    │   └── PROCEDURES_ICD.csv
-    ├── auxiliary/              # Auxiliary files
-    │   ├── drug-DDI.csv       # From GAMENet
-    │   ├── drug-atc.csv       # From GAMENet
-    │   └── ndc2rxcui.txt      # NDC to RXCUI mapping
-    └── l_data/                 # Preprocessed data (generated)
-        ├── train_atc_hierarchy2.json
-        ├── val_atc_hierarchy2.json
-        ├── test_atc_hierarchy2.json
-        └── drug_embeddings.pt
-```
+| Feature | Description |
+|:--------|:------------|
+| 🏥 **Hierarchical ATC prediction** | L1 → L2 → L3 → L4 |
+| 💊 **Cross-attention drug knowledge fusion** | Multimodal integration |
+| ⚖️ **4-layer defense for class imbalance** | Robust handling |
+| 🎯 **Performance** | F1 = 0.70, Jaccard = 0.55 on MIMIC-III |
 
+---
 
-### Download Data
-
-1. **MIMIC-III**: Apply for access at [MIMIC-III](https://mimic.mit.edu/) and place in `data/mimic3/raw/`
-
-2. **Auxiliary Files**:
-   - `drug-DDI.csv`: Download from [GAMENet](https://github.com/sjy1203/GAMENet)
-   - `drug-atc.csv`: Download from [GAMENet](https://github.com/sjy1203/GAMENet)
-   - `ndc2rxcui.txt`: Download from [GAMENet](https://github.com/sjy1203/GAMENet), named as `ndc2rxnorm_mapping.csv`
-
-3. **Preprocess**:
-   ```bash
-   cd data/mimic3
-   python construction.py
-   ```
-
-
-## Running
-
-### Training
+## 📦 **Requirements**
 
 ```bash
-bash experiment/llm_cls.bash
-```
-
-Key hyperparameters in `experiment/llm_cls.bash`:
-- `MAX_SOURCE_LENGTH=2048`
-- `MAX_TARGET_LENGTH=196`
-- `BATCH_SIZE=4`
-- `LEARNING_RATE=3e-4`
-- `LORA_RANK=8`
-
-### Evaluation
-
-```bash
-
-# Batch evaluation for multiple checkpoints
-python batch_evaluate_checkpoints.py
-```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+Python 3.10+
+PyTorch 2.0+
+CUDA 11.8+ (for GPU training)
