@@ -2,65 +2,73 @@
 
 ---
 
-## 📌 Overview
+<details open>
+<summary><b>📌 Overview</b></summary>
 
-> **LEADER** is a novel framework for EHR-based medication recommendation that improves both **accuracy** and **interpretability**.
->
-> It addresses two critical challenges:
-> - ❌ Lack of **molecular drug knowledge integration**
-> - ❌ Poor modeling of **hierarchical medication taxonomy**
->
-> ✅ Our solution:
-> - Hierarchical ATC prediction (L1 → L4)
-> - Cross-attention drug knowledge fusion
-> - Robust imbalance handling strategy
+<br>
 
----
+**LEADER** is a framework for EHR-based medication recommendation that improves:
 
-## 🏗️ Framework
+- ✅ Prediction Accuracy  
+- ✅ Interpretability  
 
-> ![Framework](https://github.com/user-attachments/assets/framework-placeholder.png)
+### 🚨 Challenges
+- Lack of molecular drug knowledge  
+- Poor hierarchical modeling  
 
----
+### 💡 Solution
+- Hierarchical ATC prediction (L1 → L4)  
+- Cross-attention drug fusion  
+- Imbalance-aware training  
 
-## 🧩 Key Components
-
-> ### 1️⃣ Hierarchical Prediction Head
-> - Multi-level ATC prediction: **L1 → L2 → L3 → L4**
-> - Enforces **hierarchical consistency**
+</details>
 
 ---
 
-> ### 2️⃣ Cross-Attention Drug Knowledge Module
-> - Integrates **molecular drug embeddings**
-> - Enhances **drug-specific representation**
+<details open>
+<summary><b>🏗️ Framework</b></summary>
+
+<br>
+
+![Framework](https://github.com/user-attachments/assets/framework-placeholder.png)
+
+</details>
 
 ---
 
-> ### 3️⃣ 4-Layer Defense Strategy
-> Handles severe class imbalance:
-> - Focal Loss  
-> - Class Weights  
-> - Threshold Optimization  
-> - Hierarchical Consistency Loss  
+<details open>
+<summary><b>🧩 Key Components</b></summary>
+
+<br>
+
+### 1️⃣ Hierarchical Prediction Head
+- Multi-level ATC prediction  
+- Consistency constraints  
+
+### 2️⃣ Cross-Attention Drug Knowledge
+- Molecular embedding fusion  
+- Better drug representation  
+
+### 3️⃣ 4-Layer Defense Strategy
+- Focal Loss  
+- Class Weights  
+- Threshold Optimization  
+- Hierarchical Loss  
+
+</details>
 
 ---
 
-## 📂 Data Format
+<details open>
+<summary><b>📂 Data Format</b></summary>
 
-> All datasets are in **JSONL format** (one sample per line)  
-> Source: **MIMIC-III**
+<br>
 
----
-
-> ### 📄 Sample
+### JSONL Sample
 ```json
 {
   "input": "Clinical narrative...",
   "target": "medications...",
   "subject_id": 12345,
-  "atc_level_1": ["A", "C"],
-  "atc_level_2": ["A1", "C0"],
-  "atc_level_3": ["A10", "C07"],
-  "atc_level_4": ["A10A", "C07A"]
+  "atc_level_1": ["A", "C"]
 }
