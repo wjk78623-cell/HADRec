@@ -1,2 +1,12 @@
 The task aims to perform hierarchy-aware medication recommendation by integrating patient EHR data with drug molecular structure information, while strictly adhering to the ATC classification hierarchy.
 Its goal is to improve the accuracy, interpretability, and clinical consistency of multi-label drug recommendations through multimodal fusion and hierarchical modeling.
+
+
+## Data Preparation
+
+1. Download [MIMIC-III](https://mimic.mit.edu/) and place in `data/mimic3/raw/`
+2. Download auxiliary files:
+   - [ATC-DDD](https://github.com/fabkury/atcd): `WHO ATC-DDD 2021-12-03.csv`
+   - [Drug-DDI](https://github.com/sjy1203/GAMENet): `drug-DDI.csv`
+   - [Drug-ATC](https://github.com/ycq091044/SafeDrug): `drug-atc.csv`
+3. Preprocess: `cd data/mimic3 && python construction.py`
