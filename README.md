@@ -78,7 +78,7 @@ python construction.py
 
 
 
-### Run Train Model with LoRA
+### Step 4: Run Train Model with LoRA
 
 ```bash
 bash experiment/llm_cls.bash
@@ -86,7 +86,7 @@ bash experiment/llm_cls.bash
 
 ---
 
-###  Evaluate on Test Set
+### Step 5:  Evaluate on Test Set
 
 ```bash
 python final_evaluation_with_bootstrap.py
