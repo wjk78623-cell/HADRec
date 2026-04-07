@@ -1,13 +1,11 @@
-好的，这是完整的 README.md，所有内容整合在一起，直接复制即可使用：
-
-```markdown
 # 🧬 Hierarchy-aware Medication Recommendation
 
-[![Python](https://img.shields.io/badge/Python-3.10+-blue)](https://python.org)
-[![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-red)](https://pytorch.org)
-[![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
+[![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://python.org)
+[![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-red.svg)](https://pytorch.org)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-> **Integrating patient EHR data with drug molecular structure for ATC hierarchy-aware multi-label drug recommendation.**  
+> Integrating patient EHR data with drug molecular structure for ATC hierarchy-aware multi-label drug recommendation.
+> 
 > *Improves accuracy, interpretability, and clinical consistency through multimodal fusion and hierarchical modeling.*
 
 ---
@@ -44,108 +42,7 @@
 
 ## 📦 Requirements
 
-```bash
+```text
 Python 3.10+
 PyTorch 2.0+
 CUDA 11.8+ (for GPU training)
-```
-
----
-
-## 📁 Data Preparation
-
-### File Structure
-
-```
-data/
-└── mimic3/
-    ├── raw/                    # Raw MIMIC-III data
-    │   ├── PRESCRIPTIONS.csv
-    │   ├── DIAGNOSES_ICD.csv
-    │   └── PROCEDURES_ICD.csv
-    ├── auxiliary/              # Auxiliary files
-    │   ├── drug-DDI.csv       # From GAMENet
-    │   ├── drug-atc.csv       # From GAMENet
-    │   └── ndc2rxcui.txt      # NDC to RXCUI mapping
-    └── l_data/                 # Preprocessed data (generated)
-        ├── train_atc_hierarchy2.json
-        ├── val_atc_hierarchy2.json
-        ├── test_atc_hierarchy2.json
-        └── drug_embeddings.pt
-```
-
-### Download Instructions
-
-1. **MIMIC-III Dataset**  
-   Apply for access at [MIMIC-III](https://mimic.mit.edu/) and place files in `data/mimic3/raw/`
-
-2. **Auxiliary Files**  
-   Download from [GAMENet](https://github.com/sjy1203/GAMENet):
-   - `drug-DDI.csv`
-   - `drug-atc.csv`
-   - `ndc2rxcui.txt` (rename from `ndc2rxnorm_mapping.csv`)
-
-3. **Preprocess**
-
-```bash
-cd data/mimic3
-python construction.py
-```
-
-> [!TIP]
-> Preprocessing will generate the `l_data/` folder automatically.
-
----
-
-## 🚀 Running
-
-### Training
-
-```bash
-bash experiment/llm_cls.bash
-```
-
-**Key hyperparameters** (set in `experiment/llm_cls.bash`):
-
-| Parameter | Value |
-|:----------|:------|
-| `MAX_SOURCE_LENGTH` | 2048 |
-| `MAX_TARGET_LENGTH` | 196 |
-| `BATCH_SIZE` | 4 |
-| `LEARNING_RATE` | 3e-4 |
-| `LORA_RANK` | 8 |
-
-### Evaluation
-
-```bash
-python batch_evaluate_checkpoints.py
-```
-
-> [!NOTE]
-> Batch evaluation for multiple checkpoints.
-
----
-
-## 📊 Results
-
-| Metric | Score |
-|:-------|:------|
-| **F1** | 0.70 |
-| **Jaccard** | 0.55 |
-
-*Evaluated on MIMIC-III dataset.*
-
----
-
-## 📝 License
-
-This project is licensed under the MIT License.
-
----
-
-## 📬 Contact
-
-For questions or collaboration, please open an issue.
-```
-
-直接复制保存为 `README.md` 即可。GitHub 会自动渲染徽章和彩色信息框（`> [!NOTE]`、`> [!IMPORTANT]`、`> [!TIP]`）。
